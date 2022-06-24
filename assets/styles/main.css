@@ -1,0 +1,36 @@
+/* FONT IMPORT */
+@import url("https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&family=Raleway:wght@400;700&family=Shadows+Into+Light&display=swap");
+
+/* ICON IMPORT */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 40;
+}
+
+/* TAILWINDCSS BASE STYLES */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* GLOBAL STYLES */
+body {
+  @apply bg-stone-50;
+}
+
+/* TRANSITIONS */
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.slide-down-enter-from {
+  transform: translateY(-20px);
+  opacity: 0;
+  height: 0px;
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  height: 0px;
+  border: none;
+}
