@@ -4,6 +4,8 @@ const toast = useToast();
 onMounted(() => {
   refresh();
 });
+const router = useRouter();
+
 const search = ref({
   recordPaymentStatus: "all",
   recordPaymentStatusOptions: [
@@ -139,6 +141,30 @@ function deleteRecord(record) {
             <th class="py-3 px-4 text-center">Действия</th>
           </tr>
         </thead>
+        <tbody v-if="pending || records.length == 0" class="h-96">
+          <tr v-if="pending">
+            <client-only>
+              <td colspan="6" align="center">
+                <UI-loading class="fill-indigo-600"></UI-loading>
+              </td>
+            </client-only>
+          </tr>
+          <tr v-else>
+            <client-only>
+              <td colspan="6" align="center">
+                <h3 class="text-md text-gray-800">
+                  Так сложились обстоятельства, что записи отсутствуют!
+                </h3>
+                <div class="mt-5">
+                  <UI-button-main
+                    name="Можем добавить!"
+                    @click="router.push('/records/add')"
+                  />
+                </div>
+              </td>
+            </client-only>
+          </tr>
+        </tbody>
         <tbody class="divide-y">
           <tr v-for="(record, index) in records" :key="record.id">
             <td class="py-2.5 px-3.5">{{ index + 1 }}</td>
