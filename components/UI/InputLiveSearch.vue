@@ -111,9 +111,27 @@ async function inputKeyEnter() {
                 />
               </div>
 
-              <!-- * Name * -->
-              <span>{{ item.name }}</span>
-              <!-- TODO: Employee comment -->
+              <div class="flex flex-col">
+                <span>{{ item.name }}</span>
+                <span
+                  class="text-xs text-red-500"
+                  v-if="item.deposit - item.score + item.balance < 0"
+                >
+                  {{
+                    "Долг по оплате: " +
+                    (item.deposit - item.score + item.balance).toString()
+                  }}</span
+                >
+                <span
+                  class="text-xs text-emerald-500"
+                  v-if="item.deposit - item.score + item.balance > 0"
+                >
+                  {{
+                    "На депозите: " +
+                    (item.deposit - item.score + item.balance).toString()
+                  }}</span
+                >
+              </div>
             </li>
           </ul>
           <div

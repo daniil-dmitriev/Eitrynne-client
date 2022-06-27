@@ -30,7 +30,7 @@ const {
   pending,
   data: liveSearchResult,
   refresh,
-} = useLazyAsyncData("liveSearch", () =>
+} = useLazyAsyncData("liveSearchMultiply", () =>
   $fetch(
     `/api/clients?count=5&offset=0&role=all&balance=all&name=${searchName.value}`
   )
@@ -160,9 +160,7 @@ function backSpaceDelete() {
                     />
                   </div>
 
-                  <!-- * Name * -->
                   <span>{{ item.name }}</span>
-                  <!-- TODO: Employee comment -->
                 </li>
               </ul>
               <div v-else class="py-1.5 text-center text-sm text-gray-600">

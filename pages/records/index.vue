@@ -184,7 +184,7 @@ function deleteRecord(record) {
                 icon="more"
                 :options="[
                   { name: 'Изменить', icon: 'info', event: 'editRecord' },
-                  { name: 'Удалить', icon: 'delete', event: 'deleteRecord' },
+                  { name: 'Удалить', icon: 'trash', event: 'deleteRecord' },
                 ]"
                 class="text-xs"
                 @editRecord="editRecord(record)"

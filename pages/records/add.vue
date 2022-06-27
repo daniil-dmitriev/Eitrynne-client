@@ -44,38 +44,39 @@ function addRecord() {
 
 async function saveRecords() {
   for (let record of records.value) {
-    try {
-      const { id, ...body } = record;
-      const recordDate = body.date + "." + new Date().getFullYear();
-      const dateArray = recordDate.split(".");
-      [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
-      const date = dateArray.join(".");
+    const { id, ...body } = record;
+    if (!body.date) {
+      toast.error("Пожалуйста проверьте правильность введенных данных!");
+      return;
+    }
+    const recordDate = body.date + "." + new Date().getFullYear();
+    const dateArray = recordDate.split(".");
+    [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
+    const date = dateArray.join(".");
 
-      const response = $fetch("/api/records", {
-        method: "post",
-        body: { ...body, date, duration: parseInt(body.duration) },
-      });
-
-      response.then(() => {
+    await $fetch("/api/records", {
+      method: "post",
+      body: { ...body, date, duration: parseInt(body.duration) },
+    })
+      .then(() => {
         toast.success(
           `Запись для ${record.employee.name} была успешно добавлена!`
         );
+
+        records.value = [
+          {
+            ...initRecord,
+            id: Math.random().toString(16).slice(2),
+            employee: { name: "", role: "employee" },
+            clients: [],
+          },
+        ];
+      })
+      .catch(() => {
+        toast.error(
+          "При добавлении записи возникли ошибки! Попробуйте снова или обратитесь к адмиинистратору!"
+        );
       });
-    } catch (e) {
-      toast.error(
-        "При добавлнеии записи возникли ошибки! Попробуйте снова или обратитесь к адмиинистратору!"
-      );
-      console.log(e);
-    } finally {
-      records.value = [
-        {
-          ...initRecord,
-          id: Math.random().toString(16).slice(2),
-          employee: { name: "", role: "employee" },
-          clients: [],
-        },
-      ];
-    }
   }
 }
 </script>
@@ -138,7 +139,7 @@ async function saveRecords() {
         </div>
       </form>
       <div class="mt-4 flex items-center justify-between">
-        <UIButtonMain name="Добавить" icon="add" @click.prevent="addRecord" />
+        <UIButtonMain name="Добавить" icon="plus" @click.prevent="addRecord" />
         <UIButtonMain
           name="Сохранить"
           icon="save"

@@ -8,6 +8,7 @@ interface Payment {
   client: Client;
   value: string;
   comment: string;
+  date: string;
 }
 
 const toast = useToast();
@@ -22,6 +23,7 @@ const initPayment: Payment = {
   client: { ...initClient },
   value: "",
   comment: "Пополнение баланса",
+  date: "",
 };
 
 const payments: Ref<Payment[]> = ref([
@@ -51,13 +53,21 @@ async function savePayments() {
 
       return;
     }
+    if (payment.date !== "") {
+      var date: string;
+      const paymentDate = payment.date + "." + new Date().getFullYear();
+      const dateArray = paymentDate.split(".");
+      [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
+      date = dateArray.join(".");
+    }
 
     const response = $fetch("/api/payments", {
       method: "post",
       body: {
-        clientId: payment.client.id,
+        client: payment.client,
         value: payment.value,
         comment: payment.comment,
+        date,
       },
     });
 
@@ -65,7 +75,7 @@ async function savePayments() {
       toast.success(
         `Платеж "${payment.client.name} - ${payment.value}" успешно добавлен!`
       );
-      deletePayment(payment.id);
+      // deletePayment(payment.id);
     });
 
     response.catch(() => {
@@ -129,6 +139,17 @@ function deletePayment(id: string): void {
               placeholder="Сумма платежа"
               mask="#######"
               v-model="payment.value"
+            />
+          </div>
+          <div class="flex basis-1/4 flex-col space-y-1.5">
+            <label class="pl-1.5 text-xs font-bold text-gray-700"
+              >Дата (Д.М)</label
+            >
+            <UI-input
+              icon="event"
+              placeholder="Дата платежа"
+              mask="##.##"
+              v-model="payment.date"
             />
           </div>
           <div class="flex basis-1/3 flex-col space-y-1.5">

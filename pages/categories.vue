@@ -116,7 +116,7 @@ function confirmAddCategory() {
         description="Категории посетителей студии, на основании которых система проводит все необходимые вычисления."
       >
         <div class="flex justify-end">
-          <UIButtonMain name="Добавить" icon="add" @click="toggleAddCategory" />
+          <UIButtonMain name="Добавить" icon="plus" @click="toggleAddCategory" />
           <UIButtonBack :loading="false" />
         </div>
       </UIContainerHeader>

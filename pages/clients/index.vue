@@ -126,7 +126,7 @@ function confirmDeleteClient(client) {
           />
           <UI-button-main
             name="Добавить"
-            icon="add"
+            icon="plus"
             link="/clients/add"
             :disabled="loading"
           />
@@ -210,12 +210,17 @@ function confirmDeleteClient(client) {
             </td>
             <td
               :class="[
-                { 'font-bold text-red-500': item.balance < 0 },
-                { 'font-bold text-green-500': item.balance > 0 },
+                { 'font-bold text-red-500': item.deposit - item.score < 0 },
+                { 'font-bold text-green-500': item.deposit - item.score > 0 },
                 'py-2.5 px-3.5',
               ]"
             >
-              {{ item.balance }}
+              {{ item.deposit - item.score }}
+              <span
+                v-if="item.balance"
+                class="font-regular text-xs text-gray-600"
+                >(+{{ item.balance }})</span
+              >
             </td>
             <!-- <td class="py-2.5 px-3.5" v-html="item.lastActivity"></td> -->
             <td class="py-2.5 px-3.5 text-center">
@@ -223,7 +228,7 @@ function confirmDeleteClient(client) {
                 icon="more"
                 :options="[
                   { name: 'Подробнее', icon: 'info', event: 'detailsClient' },
-                  { name: 'Удалить', icon: 'delete', event: 'deleteClient' },
+                  { name: 'Удалить', icon: 'trash', event: 'deleteClient' },
                 ]"
                 @detailsClient="router.push('/clients/' + item.id)"
                 @deleteClient="toggleDeleteClient(item)"
