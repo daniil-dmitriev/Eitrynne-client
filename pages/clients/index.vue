@@ -199,7 +199,11 @@ function confirmDeleteClient(client) {
               {{ item.name }}
             </td>
             <td class="py-2.5 px-3.5">
-              {{ item.role === "client" ? "Клиент" : "Сотрудник" }}
+              {{
+                item.role === "client"
+                  ? "Клиент"
+                  : `Сотрудник (${item.program})`
+              }}
             </td>
             <td class="py-2.5 px-3.5">
               {{
