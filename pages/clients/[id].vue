@@ -361,7 +361,12 @@ function deleteRecord(record) {
         title="Записи клиента"
         description="Все записи клиента в студии"
       >
-        <UIButton-main name="Добавить" icon="plus" :disabled="false" />
+        <UIButton-main
+          name="Добавить"
+          icon="plus"
+          link="/records/add"
+          :disabled="false"
+        />
       </UIContainerHeader>
 
       <!-- <UILoading class="fill-gray-600" /> -->

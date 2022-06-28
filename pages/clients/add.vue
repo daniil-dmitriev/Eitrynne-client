@@ -7,13 +7,13 @@
       >
         <UI-button-back />
       </UI-container-header>
-      <form>
+      <form class="w-full">
         <div
           v-for="client in addClients.data"
           :key="client.id"
-          class="mt-5 grid grid-cols-5 items-start space-x-3"
+          class="mt-5 flex items-center justify-between space-x-3"
         >
-          <div class="relative flex flex-col space-y-1.5">
+          <div class="relative flex w-full flex-col space-y-1.5">
             <label class="pl-1.5 text-xs font-bold text-gray-700"
               >Имя (ФИО)</label
             >
@@ -30,7 +30,7 @@
               >{{ client.errors ? client.errors.name : "" }}</span
             >
           </div>
-          <div class="relative flex flex-col space-y-1.5">
+          <div class="relative flex w-full flex-col space-y-1.5">
             <label class="pl-1.5 text-xs font-bold text-gray-700"
               >Дата рождения</label
             >
@@ -43,7 +43,7 @@
               class="text-gray-600"
             />
           </div>
-          <div class="flex flex-col space-y-1.5">
+          <div class="flex w-full flex-col space-y-1.5">
             <label class="pl-1.5 text-xs font-bold text-gray-700"
               >Тип посетителя</label
             >
@@ -54,7 +54,21 @@
               :loading="loading"
             ></UI-select>
           </div>
-          <div class="relative flex flex-col space-y-1.5">
+          <div
+            class="flex w-full flex-col space-y-1.5"
+            v-if="client.role == 'employee'"
+          >
+            <label class="pl-1.5 text-xs font-bold text-gray-700"
+              >Направление</label
+            >
+            <UI-input
+              icon="grade"
+              v-model="client.program"
+              class="text-gray-600"
+              placeholder="Например: Стандарт"
+            />
+          </div>
+          <div class="relative flex w-full flex-col space-y-1.5">
             <label class="pl-1.5 text-xs font-bold text-gray-700"
               >Категория</label
             >
@@ -74,15 +88,7 @@
           </div>
           <div class="flex flex-col space-y-1.5">
             <label class="pl-1.5 text-xs font-bold text-gray-700">&nbsp;</label>
-            <div class="flex justify-between text-sm">
-              <div class="flex items-center gap-x-2 text-gray-600">
-                <input
-                  type="checkbox"
-                  class="cursor-pointer accent-indigo-600"
-                  v-model="client.camp"
-                />
-                Посетитель сборов
-              </div>
+            <div class="flex justify-end text-sm">
               <UI-button-main
                 icon="trash"
                 class="scale-125"
@@ -141,6 +147,7 @@ const addClients: Ref = ref({
       role: "client",
       category: "z",
       camp: false,
+      program: "",
       errors: {},
     },
   ],
@@ -163,6 +170,7 @@ function addClient() {
     role: "client",
     category: "z",
     camp: false,
+    program: "",
     errors: {},
   });
 }
@@ -216,6 +224,7 @@ function deleteClient(id: string) {
       birthdate: "",
       role: "client",
       category: "z",
+      program: "",
       camp: false,
       errors: {},
     },

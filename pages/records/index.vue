@@ -1,5 +1,6 @@
 <script setup>
 import { useToast } from "vue-toastification";
+import PopupMenu from "~~/components/UI/PopupMenu.vue";
 const toast = useToast();
 onMounted(() => {
   refresh();
@@ -65,6 +66,15 @@ function checkStatus(prices) {
       return 1;
       break;
   }
+}
+
+function getDebetors(prices) {
+  return prices.map((item) => ({
+    id: item.id,
+    name: item.client.name,
+    value: item.value,
+    status: item.status,
+  }));
 }
 
 function editRecord(record) {
@@ -195,6 +205,7 @@ function deleteRecord(record) {
                     ? 'text-orange-400'
                     : 'text-green-400'
                 "
+                class="flex items-center justify-between"
               >
                 {{
                   checkStatus(record.prices) === 0
@@ -203,6 +214,16 @@ function deleteRecord(record) {
                     ? "Оплачен частично"
                     : "Оплачен"
                 }}
+                <UI-tooltip>
+                  <span
+                    v-for="debetor in getDebetors(record.prices)"
+                    :key="debetor.id"
+                    class="block font-bold"
+                    :class="!debetor.status ? 'text-red-400' : 'text-green-500'"
+                  >
+                    {{ `${debetor.name} (${debetor.value})` }}</span
+                  >
+                </UI-tooltip>
               </span>
             </td>
             <td class="py-2.5 px-3.5 text-center">
