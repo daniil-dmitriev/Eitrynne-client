@@ -1,6 +1,8 @@
-<script setup lang="ts">
+<script setup>
 import { useClientDetailsStore } from "~/stores/client-details";
 import { storeToRefs } from "pinia";
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const clientDetailsStore = useClientDetailsStore();
 const { error, loading, client, getClientInfo } =
@@ -9,9 +11,18 @@ const { error, loading, client, getClientInfo } =
 // edit client form settings
 const editClientModal = ref(false);
 const route = useRoute();
+const router = useRouter();
+const tableHeader = [
+  "Дата",
+  "Сотрудник",
+  "Длительность",
+  "Стоимость",
+  "Статус",
+];
 
 onMounted(() => {
   clientDetailsStore.fetchClient(route.params.id.toString());
+  recordsRefresh();
 });
 
 function toggleEditClient() {
@@ -93,6 +104,48 @@ const favoriteEmployees = [
     image: "https://placekitten.com/400/404",
   },
 ];
+
+const {
+  data: records,
+  pending: recordsPending,
+  refresh: recordsRefresh,
+} = useLazyFetch(`/api/clients/records?clientId=${route.params.id.toString()}`);
+
+function checkStatus(prices) {
+  let status = 0;
+
+  for (let price of prices) {
+    if (price.status === true) status++;
+  }
+
+  switch (status) {
+    case prices.length:
+      return 2;
+      break;
+    case 0:
+      return 0;
+      break;
+    default:
+      return 1;
+      break;
+  }
+}
+
+function deleteRecord(record) {
+  const response = $fetch(`/api/records/${record.id}`, {
+    method: "delete",
+  });
+  response.then(() => {
+    toast.success(`Запись ${record.employee.name} была успешно удалена`);
+    recordsRefresh();
+  });
+
+  response.catch((e) => {
+    toast.error(
+      `Ошибка при удалении записи. Попробуйте снова или обратитесь к администратору. ${e}`
+    );
+  });
+}
 </script>
 
 <template>
@@ -308,12 +361,100 @@ const favoriteEmployees = [
         title="Записи клиента"
         description="Все записи клиента в студии"
       >
-        <UIButton-main name="Добавить" icon="add" :disabled="false" />
+        <UIButton-main name="Добавить" icon="plus" :disabled="false" />
       </UIContainerHeader>
 
-      <div v-show="true" class="mb-4 flex items-center justify-center">
-        <UILoading />
-      </div>
+      <!-- <UILoading class="fill-gray-600" /> -->
+
+      <table class="mt-4 w-full rounded-md bg-white text-sm">
+        <thead>
+          <tr class="text-md bg-stone-100 text-left text-gray-600">
+            <th class="py-3 px-4">№</th>
+            <th class="py-3 px-4" v-for="item in tableHeader" :key="item">
+              {{ item }}
+            </th>
+            <th class="py-3 px-4 text-center">Действия</th>
+          </tr>
+        </thead>
+        <tbody v-if="recordsPending || records.length === 0" class="h-48">
+          <tr v-if="recordsPending">
+            <client-only>
+              <td colspan="7" align="center">
+                <UI-loading class="fill-indigo-600"></UI-loading>
+              </td>
+            </client-only>
+          </tr>
+          <tr v-else>
+            <client-only>
+              <td colspan="7" align="center">
+                <h3 class="text-md text-gray-800">
+                  Так сложились обстоятельства, что записи отсутствуют!
+                </h3>
+                <div class="mt-5">
+                  <UI-button-main
+                    name="Можем добавить!"
+                    @click="router.push('/records/add')"
+                  />
+                </div>
+              </td>
+            </client-only>
+          </tr>
+        </tbody>
+
+        <tbody class="divide-y">
+          <tr v-for="(record, index) in records" :key="record.id">
+            <td class="py-2.5 px-3.5">{{ index + 1 }}</td>
+            <td class="py-2.5 px-3.5">
+              {{ new Date(record.date).toLocaleDateString("ru") }}
+            </td>
+            <td class="py-2.5 px-3.5">{{ record.employee.name }}</td>
+            <td class="py-2.5 px-3.5">
+              <span v-for="(price, index) in record.prices" :key="price.id"
+                >{{ record.duration }}
+              </span>
+            </td>
+            <td class="py-2.5 px-3.5">
+              {{
+                record.prices.reduce(
+                  (partialSum, price) => partialSum + price.value,
+                  0
+                )
+              }}
+            </td>
+            <td class="py-2.5 px-3.5 text-xs font-bold">
+              <span
+                :class="
+                  checkStatus(record.prices) === 0
+                    ? 'text-red-400'
+                    : checkStatus(record.prices) === 1
+                    ? 'text-orange-400'
+                    : 'text-green-400'
+                "
+              >
+                {{
+                  checkStatus(record.prices) === 0
+                    ? "Не оплачен"
+                    : checkStatus(record.prices) === 1
+                    ? "Оплачен частично"
+                    : "Оплачен"
+                }}
+              </span>
+            </td>
+            <td class="py-2.5 px-3.5 text-center">
+              <UIPopupMenu
+                icon="more"
+                :options="[
+                  { name: 'Изменить', icon: 'info', event: 'editRecord' },
+                  { name: 'Удалить', icon: 'trash', event: 'deleteRecord' },
+                ]"
+                class="text-xs"
+                @editRecord="editRecord(record)"
+                @deleteRecord="deleteRecord(record)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </UIContainer>
 
     <!-- EDIT CLIENT MODAL WINDOW -->

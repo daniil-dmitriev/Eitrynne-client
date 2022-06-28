@@ -209,7 +209,7 @@ function deleteRecord(record) {
               <UIPopupMenu
                 icon="more"
                 :options="[
-                  { name: 'Изменить', icon: 'info', event: 'editRecord' },
+                  // { name: 'Изменить', icon: 'info', event: 'editRecord' },
                   { name: 'Удалить', icon: 'trash', event: 'deleteRecord' },
                 ]"
                 class="text-xs"
