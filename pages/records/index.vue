@@ -181,11 +181,22 @@ function deleteRecord(record) {
             <td class="py-2.5 px-3.5">
               {{ new Date(record.date).toLocaleDateString("ru") }}
             </td>
-            <td class="py-2.5 px-3.5">{{ record.employee.name }}</td>
             <td class="py-2.5 px-3.5">
-              <span v-for="(price, index) in record.prices" :key="price.id"
+              <NuxtLink
+                :to="`/clients/${record.employee.id}`"
+                class="hover:text-gray-500"
+              >
+                {{ record.employee.name }}
+              </NuxtLink>
+            </td>
+            <td class="py-2.5 px-3.5">
+              <NuxtLink
+                v-for="(price, index) in record.prices"
+                :key="price.id"
+                :to="`/clients/${price.client.id}`"
+                class="hover:text-gray-500"
                 >{{ price.client.name }}
-                {{ record.prices.length - 1 != index ? "- " : "" }}</span
+                {{ record.prices.length - 1 != index ? "- " : "" }}</NuxtLink
               >
             </td>
             <td class="py-2.5 px-3.5">
@@ -200,10 +211,10 @@ function deleteRecord(record) {
               <span
                 :class="
                   checkStatus(record.prices) === 0
-                    ? 'text-red-400'
+                    ? 'text-rose-500'
                     : checkStatus(record.prices) === 1
                     ? 'text-orange-400'
-                    : 'text-green-400'
+                    : 'text-emerald-500'
                 "
                 class="flex items-center justify-between"
               >
@@ -219,7 +230,9 @@ function deleteRecord(record) {
                     v-for="debetor in getDebetors(record.prices)"
                     :key="debetor.id"
                     class="block font-bold"
-                    :class="!debetor.status ? 'text-red-400' : 'text-green-500'"
+                    :class="
+                      !debetor.status ? 'text-rose-300' : 'text-emerald-300'
+                    "
                   >
                     {{ `${debetor.name} (${debetor.value})` }}</span
                   >

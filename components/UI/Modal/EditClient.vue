@@ -1,32 +1,47 @@
 <script setup>
-import { useClientDetailsStore } from "~~/stores/client-details";
-import { storeToRefs } from "pinia";
-defineProps(["modelValue"]);
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
+
+const { client } = defineProps(["modelValue", "client"]);
 const emit = defineEmits(["close"]);
-const clientDetailsStore = useClientDetailsStore();
 
-const { client, loading } = storeToRefs(clientDetailsStore);
 const changesInClient = ref(false);
-clientDetailsStore.$subscribe((mutation) => {
-  const posibleMutations = [
-    "name",
-    "birthdate",
-    "value",
-    "role",
-    "active",
-    "subs_fee",
-    "phone",
-  ];
-  if (posibleMutations.includes(mutation.events.key)) {
-    changesInClient.value = true;
-  }
-});
+const config = useRuntimeConfig();
 
+const updatedClient = { ...client };
 function updateClient() {
-  if (!changesInClient.value) {
-    return;
+  let date = "";
+  if (updatedClient.birthdate) {
+    const dateArray = updatedClient.birthdate?.split(".");
+    [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
+    date = dateArray.join(".");
   }
-  clientDetailsStore.updateClient();
+  const response = $fetch(`/api/clients/${updatedClient.id}`, {
+    method: "put",
+    body: {
+      name: updatedClient.name,
+      birthdate: new Date(date),
+      role: updatedClient.role,
+      category: updatedClient.category.value,
+      subs_fee: updatedClient.subs_fee,
+      phone: updatedClient.phone,
+      active: updatedClient.active,
+    },
+  });
+
+  response.then(() => {
+    const message = updatedClient.name + " был успешно обновлен";
+    toast.success(message);
+  });
+
+  response.catch(() => {
+    const message =
+      "При обновлении " +
+      updatedClient.name +
+      " возникли неполадки. Попробуйте снова.";
+    toast.error(message);
+  });
   emit("close");
 }
 </script>
@@ -48,10 +63,7 @@ function updateClient() {
               @click="$emit('close')"
             />
           </UIContainerHeader>
-          <div v-if="loading" class="flex h-32 items-center justify-center">
-            <UILoading class="fill-gray-400" />
-          </div>
-          <div class="grid grid-cols-3 gap-x-2 gap-y-2" v-else>
+          <div class="grid grid-cols-3 gap-x-2 gap-y-2">
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
                 >Имя (ФИО)</label
@@ -59,7 +71,7 @@ function updateClient() {
               <div class="relative flex items-center gap-x-2">
                 <UI-input
                   placeholder="Введите имя"
-                  v-model="client.name"
+                  v-model="updatedClient.name"
                   icon="person"
                 />
               </div>
@@ -75,7 +87,7 @@ function updateClient() {
                       value: 'employee',
                     },
                   ]"
-                  v-model="client.role"
+                  v-model="updatedClient.role"
                   icon="event"
                 />
               </div>
@@ -87,7 +99,7 @@ function updateClient() {
               <div class="relative flex items-center gap-x-2">
                 <UI-input
                   placeholder="Введите категорию"
-                  v-model="client.category.value"
+                  v-model="updatedClient.category.value"
                   icon="group"
                   mask="A"
                 />
@@ -100,7 +112,7 @@ function updateClient() {
               <div class="relative flex items-center gap-x-2">
                 <UI-input
                   placeholder="Введите дату рождения"
-                  v-model="client.birthdate"
+                  v-model="updatedClient.birthdate"
                   icon="event"
                   mask="##.##.####"
                 />
@@ -113,8 +125,8 @@ function updateClient() {
               <div class="relative flex items-center gap-x-2">
                 <UI-input
                   placeholder="Введите номер телефона"
-                  v-model="client.phone"
-                  icon="call"
+                  v-model="updatedClient.phone"
+                  icon="phone"
                   mask="+7-(###) ###-##-##"
                 />
               </div>
@@ -126,22 +138,21 @@ function updateClient() {
               <div class="relative flex items-center gap-x-2">
                 <UI-input
                   placeholder="Ежемесячные взносы"
-                  v-model="client.subs_fee"
-                  icon="account_balance"
+                  v-model="updatedClient.subs_fee"
+                  icon="subscription"
                   mask="#######"
                 />
               </div>
             </div>
             <div class="col-span-3 mt-4 flex justify-between">
               <UIButton-main
-                :name="client.active ? 'В архив' : 'Из архива'"
+                :name="updatedClient.active ? 'В архив' : 'Из архива'"
                 icon="archive"
-                @click="client.active = !client.active"
+                @click="updatedClient.active = !updatedClient.active"
               />
               <UIButton-main
                 name="Сохранить"
                 icon="save"
-                :disabled="!changesInClient"
                 @click="updateClient"
               />
             </div>

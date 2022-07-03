@@ -1,7 +1,6 @@
 <script setup>
 defineProps({
   icon: String,
-  loading: Boolean,
   options: Array,
 });
 
@@ -22,12 +21,7 @@ function togglePopupMenu() {
     class="relative flex cursor-pointer justify-center"
     ref="popupMenuContainer"
   >
-    <UI-icon
-      :name="icon"
-      class="w-5"
-      @click="togglePopupMenu($event)"
-      :loading="loading"
-    />
+    <UI-icon :name="icon" class="w-5" @click="togglePopupMenu($event)" />
     <!-- <MoreSvg
       class="w-5 text-gray-400 hover:text-gray-600"
       @click="togglePopupMenu($event)"

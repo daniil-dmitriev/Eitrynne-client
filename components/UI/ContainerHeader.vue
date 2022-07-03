@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full items-center justify-between">
+  <div class="mb-4 flex w-full items-center justify-between">
     <!-- Page name -->
     <div>
       <h2 class="text-xl font-bold text-gray-800">{{ title }}</h2>
