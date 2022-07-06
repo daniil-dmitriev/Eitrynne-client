@@ -65,7 +65,7 @@ async function savePayments() {
       method: "post",
       body: {
         client: payment.client,
-        value: payment.value,
+        value: parseInt(payment.value),
         comment: payment.comment,
         date,
       },
@@ -75,7 +75,6 @@ async function savePayments() {
       toast.success(
         `Платеж "${payment.client.name} - ${payment.value}" успешно добавлен!`
       );
-      // deletePayment(payment.id);
     });
 
     response.catch(() => {

@@ -44,7 +44,14 @@ const search = ref({
   ],
 });
 
-const tableHeader = ["Дата", "Сотрудник", "Клиенты", "Стоимость", "Статус"];
+const tableHeader = [
+  "Дата",
+  "Длительность",
+  "Сотрудник",
+  "Клиенты",
+  "Стоимость",
+  "Статус",
+];
 
 const { data: records, pending, refresh, error } = useLazyFetch(`/api/records`);
 
@@ -154,14 +161,14 @@ function deleteRecord(record) {
         <tbody v-if="pending || records.length == 0" class="h-96">
           <tr v-if="pending">
             <client-only>
-              <td colspan="6" align="center">
+              <td colspan="8" align="center">
                 <UI-loading class="fill-indigo-600"></UI-loading>
               </td>
             </client-only>
           </tr>
           <tr v-else>
             <client-only>
-              <td colspan="6" align="center">
+              <td colspan="8" align="center">
                 <h3 class="text-md text-gray-800">
                   Так сложились обстоятельства, что записи отсутствуют!
                 </h3>
@@ -180,6 +187,9 @@ function deleteRecord(record) {
             <td class="py-2.5 px-3.5">{{ index + 1 }}</td>
             <td class="py-2.5 px-3.5">
               {{ new Date(record.date).toLocaleDateString("ru") }}
+            </td>
+            <td class="py-2.5 px-3.5">
+              {{ record.duration }}
             </td>
             <td class="py-2.5 px-3.5">
               <NuxtLink

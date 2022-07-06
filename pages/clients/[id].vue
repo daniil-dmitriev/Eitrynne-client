@@ -36,44 +36,13 @@ function toggleEditClient() {
 function deleteClient() {
   console.log("deleteClient handler");
 }
-// ! REFACTOR THIS NAMES
-const lastActivity = [
-  {
-    image: "https://placekitten.com/700/701",
-    name: "+4500р",
-    comment: "Оплата уроков",
-    date: "01.06.22",
-    type: "payment",
-  },
-  {
-    image: "https://placekitten.com/700/700",
-    name: "Терехова Анна 45мин.",
-    comment: "В паре с Евгения Речная, 1500р.",
-    date: "31.05.22",
-    type: "record",
-  },
-  {
-    image: "https://placekitten.com/701/700",
-    name: "Терехов Артем 45мин.",
-    comment: "Индивидуально, 3000р.",
-    date: "30.05.22",
-    type: "record",
-  },
-  {
-    image: "https://placekitten.com/600/600",
-    name: "+1400р",
-    comment: "Оплата уроков",
-    date: "26.05.22",
-    type: "payment",
-  },
-  {
-    image: "https://placekitten.com/701/701",
-    name: "Долгушин Алексей 45мин.",
-    comment: "В паре с Евгения Речная, 1400р.",
-    date: "26.05.22",
-    type: "record",
-  },
-];
+
+console.log(client.value);
+const {
+  data: lastActivities,
+  pending: lastActivitiesPending,
+  refresh: lastActivitiesRefresh,
+} = useLazyFetch(`/api/clients/${route.params.id.toString()}/lastActivity`);
 
 const {
   data: records,
@@ -401,22 +370,23 @@ function deleteRecord(record) {
         <ul>
           <li
             class="relative flex items-center justify-between border-l py-3 pl-6"
-            v-for="(activity, index) in lastActivity"
-            :key="index + activity.name"
+            v-for="(activity, index) in lastActivities"
+            :key="activity.id"
           >
             <div
-              :class="[
-                activity.type === 'record'
-                  ? 'bg-gray-400 shadow-sm shadow-gray-300'
-                  : 'bg-emerald-500 shadow-sm shadow-emerald-300',
-                'absolute -left-1 h-2 w-2 rounded-full',
-              ]"
+              class="absolute -left-1 h-2 w-2 rounded-full bg-gray-400 shadow-sm shadow-gray-300"
             ></div>
             <div class="flex items-center gap-x-2">
               <img
-                :src="activity.image"
+                v-if="activity.type === 'record'"
+                :src="`${config.API_BASE_URL}/clients/${activity.employeeId}/avatar`"
                 class="h-10 w-10 rounded-full"
                 alt=""
+              />
+              <UIIcon
+                name="attach_money"
+                class="h-10 w-10 text-emerald-500"
+                v-if="activity.type === 'payment'"
               />
               <div>
                 <p
@@ -441,7 +411,7 @@ function deleteRecord(record) {
               </div>
             </div>
             <span class="self-start pt-1 text-xs text-gray-400">{{
-              activity.date
+              new Date(activity.date).toLocaleDateString("ru")
             }}</span>
           </li>
         </ul>

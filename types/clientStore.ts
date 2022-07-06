@@ -9,6 +9,8 @@ export interface Client {
   record_fee?: number;
   active?: boolean;
   email?: string;
+  deposit?: number;
+  score?: number;
   category?: Category;
   phone?: string;
   password?: string;
