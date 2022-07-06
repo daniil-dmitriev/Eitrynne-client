@@ -2,17 +2,25 @@
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
-const { data: categories } = useFetch("/api/categories", { method: "get" });
-const { data: prices } = useFetch("/api/prices", { method: "get" });
-const { data: employees } = useFetch(
-  "/api/clients?count=5&offset=0&role=employee&balance=all&name=",
-  {
+
+const [
+  { data: categories, refresh: refreshCategories },
+  { data: prices, refresh: refreshPrices },
+  { data: employees, refresh: refreshClients },
+] = await Promise.all([
+  useFetch("/api/categories", { method: "get" }),
+  useFetch("/api/prices", { method: "get" }),
+  useFetch("/api/clients?count=5&offset=0&role=employee&balance=all&name=", {
     method: "get",
-  }
-);
+  }),
+]);
 const saveDisabled = ref(true);
 const changedPrices = [];
 const changedEmployees = [];
+
+onMounted(() => {
+  refreshCategories(), refreshClients(), refreshPrices();
+});
 
 function handleChangePrice(id, value) {
   changedPrices.push({

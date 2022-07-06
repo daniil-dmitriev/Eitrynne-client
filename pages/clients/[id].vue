@@ -2,16 +2,25 @@
 import { useClientDetailsStore } from "~/stores/client-details";
 import { storeToRefs } from "pinia";
 import { useToast } from "vue-toastification";
-const toast = useToast();
+import { axios } from "axios";
 
-const clientDetailsStore = useClientDetailsStore();
-const { error, loading, client, getClientInfo } =
-  storeToRefs(clientDetailsStore);
-
-// edit client form settings
-const editClientModal = ref(false);
+const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
+
+onBeforeMount(() => {
+  recordsRefresh();
+  clientRefresh();
+});
+
+const {
+  data: client,
+  pending: clientPending,
+  refresh: clientRefresh,
+} = useFetch(`/api/clients/${route.params.id.toString()}`);
+// edit client form settings
+const editClientModal = ref(false);
 const tableHeader = [
   "Дата",
   "Сотрудник",
@@ -20,11 +29,6 @@ const tableHeader = [
   "Статус",
 ];
 
-onMounted(() => {
-  clientDetailsStore.fetchClient(route.params.id.toString());
-  recordsRefresh();
-});
-
 function toggleEditClient() {
   editClientModal.value = true;
 }
@@ -32,84 +36,80 @@ function toggleEditClient() {
 function deleteClient() {
   console.log("deleteClient handler");
 }
-// ! REFACTOR THIS NAMES
-const lastActivity = [
-  {
-    image: "https://placekitten.com/700/701",
-    name: "+4500р",
-    comment: "Оплата уроков",
-    date: "01.06.22",
-    type: "payment",
-  },
-  {
-    image: "https://placekitten.com/700/700",
-    name: "Терехова Анна 45мин.",
-    comment: "В паре с Евгения Речная, 1500р.",
-    date: "31.05.22",
-    type: "record",
-  },
-  {
-    image: "https://placekitten.com/701/700",
-    name: "Терехов Артем 45мин.",
-    comment: "Индивидуально, 3000р.",
-    date: "30.05.22",
-    type: "record",
-  },
-  {
-    image: "https://placekitten.com/600/600",
-    name: "+1400р",
-    comment: "Оплата уроков",
-    date: "26.05.22",
-    type: "payment",
-  },
-  {
-    image: "https://placekitten.com/701/701",
-    name: "Долгушин Алексей 45мин.",
-    comment: "В паре с Евгения Речная, 1400р.",
-    date: "26.05.22",
-    type: "record",
-  },
-];
 
-// ! REFACTOR THIS NAMES
-const favoriteEmployees = [
-  {
-    name: "Терехов Артемий",
-    count: 15,
-    discipline: "Стандарт",
-    image: "https://placekitten.com/400/400",
-  },
-  {
-    name: "Долгушин Алексей",
-    count: 12,
-    discipline: "Латина",
-    image: "https://placekitten.com/400/401",
-  },
-  {
-    name: "Терехова Анна",
-    count: 12,
-    discipline: "Стандарт",
-    image: "https://placekitten.com/400/402",
-  },
-  {
-    name: "Ефанина Анна",
-    count: 8,
-    discipline: "Латина",
-    image: "https://placekitten.com/400/403",
-  },
-  {
-    name: "Горбатенко Алексей",
-    count: 5,
-    discipline: "Хореография",
-    image: "https://placekitten.com/400/404",
-  },
-];
+console.log(client.value);
+const {
+  data: lastActivities,
+  pending: lastActivitiesPending,
+  refresh: lastActivitiesRefresh,
+} = useLazyFetch(`/api/clients/${route.params.id.toString()}/lastActivity`);
 
 const {
   data: records,
   pending: recordsPending,
   refresh: recordsRefresh,
 } = useLazyFetch(`/api/clients/records?clientId=${route.params.id.toString()}`);
+
+const {
+  data: employees,
+  pending: employeesPending,
+  refresh: employeeRefresh,
+} = useLazyFetch(`/api/clients/${route.params.id.toString()}/employee`);
+
+const file = ref(null);
+
+async function changeClientImage() {
+  if (file.value.files[0].size > 1e6) {
+    toast.warning(
+      "Загружаемое изображение не должно превышать размер 1МБ. Попробуйте другое изображение"
+    );
+
+    return;
+  }
+
+  const id = route.params.id.toString();
+  const fd = new FormData();
+
+  const ext = file.value.files[0].name.split(".").at(-1).toLowerCase();
+  fd.append("avatar", file.value.files[0], `${id}.${ext}`);
+
+  const response = $fetch(`${config.API_BASE_URL}/clients/${id}/avatar`, {
+    method: "post",
+    body: fd,
+  });
+
+  response.then(() => {
+    toast.success("Аватар пользователя был успешно обновлен!");
+  });
+
+  response.catch(() => {
+    toast.error(
+      "При обновлении аватара произошла ошибка. Попробуйте снова или обратитесь к администратору!"
+    );
+  });
+}
+
+async function deleteClientImage() {
+  const id = route.params.id.toString();
+  const response = await $fetch(`${config.API_BASE_URL}/clients/${id}/avatar`, {
+    method: "delete",
+  });
+
+  response.then(() => {
+    toast.success("Аватар пользователя был успешно удален!");
+  });
+
+  response.catch(() => {
+    toast.error(
+      "При обновлении аватара произошла ошибка. Попробуйте снова или обратитесь к администратору!"
+    );
+  });
+}
+
+function closeEditClientModal() {
+  editClientModal.value = false;
+  clientRefresh();
+}
 
 function checkStatus(prices) {
   let status = 0;
@@ -121,13 +121,10 @@ function checkStatus(prices) {
   switch (status) {
     case prices.length:
       return 2;
-      break;
     case 0:
       return 0;
-      break;
     default:
       return 1;
-      break;
   }
 }
 
@@ -151,15 +148,46 @@ function deleteRecord(record) {
 <template>
   <div class="space-y-3">
     <UIContainer>
-      <div class="flex justify-between">
+      <div class="flex items-center justify-between">
         <!-- * Client info (avatar, name + email) -->
         <div class="flex gap-x-4">
-          <img
-            class="h-32 w-32 rounded-md"
-            src="https://placekitten.com/601/501"
-            v-if="!clientDetailsStore.loading"
-          />
-          <UILoading class="h-24 w-24 fill-indigo-600" v-else />
+          <div class="group relative flex h-24 w-24 overflow-hidden rounded-md">
+            <img
+              class="z-10 h-full w-full scale-150 object-cover"
+              :src="`${
+                config.API_BASE_URL
+              }/clients/${route.params.id.toString()}/avatar`"
+            />
+            <div
+              class="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center"
+            >
+              <UILoading class="fill-indigo-600" />
+            </div>
+            <div
+              class="absolute right-0 bottom-0 left-0 z-10 hidden cursor-pointer items-center justify-around rounded-sm bg-gray-900/75 text-lg font-bold text-white group-hover:flex"
+            >
+              <div
+                class="flex w-full items-center justify-center py-1 px-1.5 transition-colors duration-75 ease-in hover:bg-gray-500/25"
+              >
+                <label for="fileInput" class="cursor-pointer">
+                  <UIIcon name="edit" class="mx-1 h-4 w-4" />
+                </label>
+                <input
+                  type="file"
+                  id="fileInput"
+                  class="hidden"
+                  ref="file"
+                  accept="image/*"
+                  @change="changeClientImage()"
+                />
+              </div>
+              <div
+                class="flex w-full items-center justify-center py-1 px-1.5 transition-colors duration-75 ease-in hover:bg-gray-500/25"
+              >
+                <UIIcon name="trash" class="mx-1 h-4 w-4" />
+              </div>
+            </div>
+          </div>
           <div class="flex flex-col gap-y-2">
             <!-- info -->
             <div>
@@ -173,7 +201,6 @@ function deleteRecord(record) {
                     { name: 'Изменить', icon: 'edit', event: 'editClient' },
                     { name: 'Удалить', icon: 'delete', event: 'deleteClient' },
                   ]"
-                  :loading="loading"
                   @editClient="toggleEditClient"
                   @deleteClient="deleteClient"
                   class="text-sm"
@@ -195,68 +222,141 @@ function deleteRecord(record) {
               <!-- Balance -->
               <div>
                 <p class="text-xs text-gray-400">Баланс:</p>
-                <div
-                  :class="[
-                    client && client.balance < 0
-                      ? 'text-rose-500'
-                      : 'text-emerald-500',
-                    'flex items-center gap-x-0.5',
-                  ]"
-                >
-                  <UIIcon
-                    name="account_balance_wallet"
-                    class="text-lg"
-                    :loading="loading"
-                  />
-                  <span class="text-sm font-bold" v-if="!loading">
-                    {{ client.balance }}
-                  </span>
-                </div>
+                <client-only>
+                  <UILoading class="fill-indigo-600" v-if="clientPending" />
+                  <div
+                    :class="[
+                      client && client.deposit - client.score < 0
+                        ? 'text-rose-500'
+                        : 'text-emerald-500',
+                      'flex items-center gap-x-0.5',
+                    ]"
+                    v-else
+                  >
+                    <UIIcon name="account_balance_wallet" class="text-lg" />
+                    <span class="text-sm font-bold" v-if="client">
+                      {{ client.deposit - client.score }}
+                    </span>
+                    <span class="text-xs text-gray-600" v-if="client.balance"
+                      >(+{{ client.balance }})
+                    </span>
+                  </div>
+                </client-only>
               </div>
               <!-- Taked records -->
-              <div>
+              <!-- <div>
                 <p class="text-xs text-gray-400">За неделю:</p>
                 <div class="flex items-center gap-x-0.5 text-indigo-500">
-                  <UIIcon
-                    name="shopping_cart"
-                    class="text-lg"
-                    :loading="loading"
-                  />
-                  <span class="text-sm font-bold" v-if="!loading">7600</span>
+                  <UIIcon name="shopping_cart" class="text-lg" />
+                  <span class="text-sm font-bold">7600</span>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
 
         <!-- * Full client additional info -->
+        <client-only>
+          <div class="flex">
+            <table class="table-fixed text-sm">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-600">
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="grade" class="mr-2" />
+                    Роль
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.role === "client" ? "Клиент" : "Сотрудник" }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="grade" class="mr-2" />
+                    Программа
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.program || "Не указана" }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="group" class="mr-2" />
+                    Категория
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.category.value }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="subscription" class="mr-2" />
+                    Абонемент
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.subs_fee || "Отсутствует" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="table-fixed text-sm">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-600">
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="event" class="mr-2" />
+                    Дата Рождения
+                  </td>
+                  <td class="px-2.5">
+                    {{
+                      new Date(client.birthdate).toLocaleDateString("ru") ||
+                      "Не указана"
+                    }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="phone" class="mr-2" />
+                    Телефон
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.phone || "Не указан" }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="email" class="mr-2" />
+                    Почта
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.email || "Не указан" }}
+                  </td>
+                </tr>
+                <tr class="flex">
+                  <td class="inline-flex w-40 px-2.5 font-bold">
+                    <UIIcon name="check" class="mr-2" />
+                    Статус
+                  </td>
+                  <td class="px-2.5">
+                    {{ client.active ? "Активен" : "В архиве" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </client-only>
 
-        <table class="table-fixed text-sm">
-          <thead>
-            <tr>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody class="text-gray-600" v-if="!loading">
-            <tr v-for="item in getClientInfo" :key="item.field">
-              <td class="flex items-center gap-x-2 font-bold">
-                <UIIcon :name="item.icon" class="text-xs" :loading="loading" />
-                {{ item.field }}
-              </td>
-              <td class="pl-8">{{ item.value }}</td>
-            </tr>
-          </tbody>
-          <tbody v-else>
-            <tr>
-              <td colspan="2" align="center">
-                <UILoading class="fill-gray-400" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div>
+        <div class="self-start">
           <UIButton-back />
         </div>
       </div>
@@ -267,28 +367,26 @@ function deleteRecord(record) {
           title="Последняя активность"
           description="Записи и внесенные платежи"
         />
-        <div v-show="loading" class="mb-4 flex items-center justify-center">
-          <UILoading />
-        </div>
         <ul>
           <li
             class="relative flex items-center justify-between border-l py-3 pl-6"
-            v-for="(activity, index) in lastActivity"
-            :key="index + activity.name"
+            v-for="(activity, index) in lastActivities"
+            :key="activity.id"
           >
             <div
-              :class="[
-                activity.type === 'record'
-                  ? 'bg-gray-400 shadow-sm shadow-gray-300'
-                  : 'bg-emerald-500 shadow-sm shadow-emerald-300',
-                'absolute -left-1 h-2 w-2 rounded-full',
-              ]"
+              class="absolute -left-1 h-2 w-2 rounded-full bg-gray-400 shadow-sm shadow-gray-300"
             ></div>
             <div class="flex items-center gap-x-2">
               <img
-                :src="activity.image"
+                v-if="activity.type === 'record'"
+                :src="`${config.API_BASE_URL}/clients/${activity.employeeId}/avatar`"
                 class="h-10 w-10 rounded-full"
                 alt=""
+              />
+              <UIIcon
+                name="attach_money"
+                class="h-10 w-10 text-emerald-500"
+                v-if="activity.type === 'payment'"
               />
               <div>
                 <p
@@ -305,7 +403,6 @@ function deleteRecord(record) {
                       activity.type === 'record' ? 'school' : 'credit_score'
                     "
                     class="text-sm"
-                    :loading="loading"
                   />
                 </p>
                 <p class="text-xs text-gray-600">
@@ -314,7 +411,7 @@ function deleteRecord(record) {
               </div>
             </div>
             <span class="self-start pt-1 text-xs text-gray-400">{{
-              activity.date
+              new Date(activity.date).toLocaleDateString("ru")
             }}</span>
           </li>
         </ul>
@@ -324,13 +421,18 @@ function deleteRecord(record) {
           title="Рейтинг сотрудников"
           description="С кем клиент больше всего занимается"
         />
-        <div v-show="loading" class="mb-4 flex items-center justify-center">
-          <UILoading />
-        </div>
+        <client-only>
+          <div
+            v-show="employeesPending"
+            class="mb-4 flex items-center justify-center"
+          >
+            <UILoading />
+          </div>
+        </client-only>
         <ul class="divide-y divide-gray-50">
           <li
             class="relative flex items-center justify-between py-3 pl-6"
-            v-for="(employee, index) in favoriteEmployees"
+            v-for="(employee, index) in employees"
             :key="index + employee.name"
           >
             <div class="absolute left-0 text-sm text-gray-400">
@@ -338,8 +440,8 @@ function deleteRecord(record) {
             </div>
             <div class="flex items-center gap-x-2">
               <img
-                :src="employee.image"
-                class="h-10 w-10 rounded-full"
+                :src="`${config.API_BASE_URL}/clients/${employee.id}/avatar`"
+                class="h-10 w-10 cursor-pointer rounded-full"
                 alt=""
               />
               <div>
@@ -347,7 +449,7 @@ function deleteRecord(record) {
                   {{ employee.name }}
                 </p>
                 <p class="text-xs text-gray-600">
-                  {{ employee.discipline }}
+                  {{ employee.program }}
                 </p>
               </div>
             </div>
@@ -463,9 +565,16 @@ function deleteRecord(record) {
     </UIContainer>
 
     <!-- EDIT CLIENT MODAL WINDOW -->
-    <UIModalEditClient
-      v-model="editClientModal"
-      @close="editClientModal = false"
-    />
+    <client-only>
+      <UIModalEditClient
+        v-model="editClientModal"
+        @close="closeEditClientModal"
+        :client="{
+          ...client,
+          birthdate:
+            new Date(client.birthdate).toLocaleDateString('ru') || null,
+        }"
+      />
+    </client-only>
   </div>
 </template>

@@ -44,7 +44,14 @@ const search = ref({
   ],
 });
 
-const tableHeader = ["Дата", "Сотрудник", "Клиенты", "Стоимость", "Статус"];
+const tableHeader = [
+  "Дата",
+  "Длительность",
+  "Сотрудник",
+  "Клиенты",
+  "Стоимость",
+  "Статус",
+];
 
 const { data: records, pending, refresh, error } = useLazyFetch(`/api/records`);
 
@@ -154,14 +161,14 @@ function deleteRecord(record) {
         <tbody v-if="pending || records.length == 0" class="h-96">
           <tr v-if="pending">
             <client-only>
-              <td colspan="6" align="center">
+              <td colspan="8" align="center">
                 <UI-loading class="fill-indigo-600"></UI-loading>
               </td>
             </client-only>
           </tr>
           <tr v-else>
             <client-only>
-              <td colspan="6" align="center">
+              <td colspan="8" align="center">
                 <h3 class="text-md text-gray-800">
                   Так сложились обстоятельства, что записи отсутствуют!
                 </h3>
@@ -181,11 +188,25 @@ function deleteRecord(record) {
             <td class="py-2.5 px-3.5">
               {{ new Date(record.date).toLocaleDateString("ru") }}
             </td>
-            <td class="py-2.5 px-3.5">{{ record.employee.name }}</td>
             <td class="py-2.5 px-3.5">
-              <span v-for="(price, index) in record.prices" :key="price.id"
+              {{ record.duration }}
+            </td>
+            <td class="py-2.5 px-3.5">
+              <NuxtLink
+                :to="`/clients/${record.employee.id}`"
+                class="hover:text-gray-500"
+              >
+                {{ record.employee.name }}
+              </NuxtLink>
+            </td>
+            <td class="py-2.5 px-3.5">
+              <NuxtLink
+                v-for="(price, index) in record.prices"
+                :key="price.id"
+                :to="`/clients/${price.client.id}`"
+                class="hover:text-gray-500"
                 >{{ price.client.name }}
-                {{ record.prices.length - 1 != index ? "- " : "" }}</span
+                {{ record.prices.length - 1 != index ? "- " : "" }}</NuxtLink
               >
             </td>
             <td class="py-2.5 px-3.5">
@@ -200,10 +221,10 @@ function deleteRecord(record) {
               <span
                 :class="
                   checkStatus(record.prices) === 0
-                    ? 'text-red-400'
+                    ? 'text-rose-500'
                     : checkStatus(record.prices) === 1
                     ? 'text-orange-400'
-                    : 'text-green-400'
+                    : 'text-emerald-500'
                 "
                 class="flex items-center justify-between"
               >
@@ -219,7 +240,9 @@ function deleteRecord(record) {
                     v-for="debetor in getDebetors(record.prices)"
                     :key="debetor.id"
                     class="block font-bold"
-                    :class="!debetor.status ? 'text-red-400' : 'text-green-500'"
+                    :class="
+                      !debetor.status ? 'text-rose-300' : 'text-emerald-300'
+                    "
                   >
                     {{ `${debetor.name} (${debetor.value})` }}</span
                   >
