@@ -26,6 +26,8 @@ function updateClient() {
       subs_fee: updatedClient.value.subs_fee,
       phone: updatedClient.value.phone,
       active: updatedClient.value.active,
+      program: updatedClient.value.program,
+      email: updatedClient.value.email,
     },
   });
 
@@ -93,6 +95,18 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
+                >Программа</label
+              >
+              <div class="relative flex items-center gap-x-2">
+                <UIInput
+                  icon="grade"
+                  placeholder="Например: Латина"
+                  v-model="updatedClient.program"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col space-y-1.5">
+              <label class="pl-1.5 text-xs font-bold text-gray-700"
                 >Категория</label
               >
               <div class="relative flex items-center gap-x-2">
@@ -119,6 +133,19 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
+                >Абонемент</label
+              >
+              <div class="relative flex items-center gap-x-2">
+                <UI-input
+                  placeholder="Ежемесячные взносы"
+                  v-model="updatedClient.subs_fee"
+                  icon="subscription"
+                  mask="#######"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col space-y-1.5">
+              <label class="pl-1.5 text-xs font-bold text-gray-700"
                 >Телефон</label
               >
               <div class="relative flex items-center gap-x-2">
@@ -132,17 +159,17 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
-                >Абонемент</label
+                >Email</label
               >
               <div class="relative flex items-center gap-x-2">
                 <UI-input
-                  placeholder="Ежемесячные взносы"
-                  v-model="updatedClient.subs_fee"
-                  icon="subscription"
-                  mask="#######"
+                  placeholder="Введите номер email"
+                  v-model="updatedClient.email"
+                  icon="email"
                 />
               </div>
             </div>
+
             <div class="col-span-3 mt-4 flex justify-between">
               <UIButton-main
                 :name="updatedClient.active ? 'В архив' : 'Из архива'"
