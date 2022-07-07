@@ -75,6 +75,8 @@ async function savePayments() {
       toast.success(
         `Платеж "${payment.client.name} - ${payment.value}" успешно добавлен!`
       );
+
+      deletePayment(payment.id);
     });
 
     response.catch(() => {

@@ -18,7 +18,7 @@ const {
   data: client,
   pending: clientPending,
   refresh: clientRefresh,
-} = useFetch(`/api/clients/${route.params.id.toString()}`);
+} = await useFetch(`/api/clients/${route.params.id.toString()}`);
 // edit client form settings
 const editClientModal = ref(false);
 const tableHeader = [
@@ -37,7 +37,6 @@ function deleteClient() {
   console.log("deleteClient handler");
 }
 
-console.log(client.value);
 const {
   data: lastActivities,
   pending: lastActivitiesPending,
@@ -199,7 +198,7 @@ function deleteRecord(record) {
                   icon="settings"
                   :options="[
                     { name: 'Изменить', icon: 'edit', event: 'editClient' },
-                    { name: 'Удалить', icon: 'delete', event: 'deleteClient' },
+                    { name: 'Удалить', icon: 'trash', event: 'deleteClient' },
                   ]"
                   @editClient="toggleEditClient"
                   @deleteClient="deleteClient"
@@ -256,105 +255,103 @@ function deleteRecord(record) {
         </div>
 
         <!-- * Full client additional info -->
-        <client-only>
-          <div class="flex">
-            <table class="table-fixed text-sm">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="text-gray-600">
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="grade" class="mr-2" />
-                    Роль
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.role === "client" ? "Клиент" : "Сотрудник" }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="grade" class="mr-2" />
-                    Программа
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.program || "Не указана" }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="group" class="mr-2" />
-                    Категория
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.category.value }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="subscription" class="mr-2" />
-                    Абонемент
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.subs_fee || "Отсутствует" }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table class="table-fixed text-sm">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="text-gray-600">
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="event" class="mr-2" />
-                    Дата Рождения
-                  </td>
-                  <td class="px-2.5">
-                    {{
-                      new Date(client.birthdate).toLocaleDateString("ru") ||
-                      "Не указана"
-                    }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="phone" class="mr-2" />
-                    Телефон
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.phone || "Не указан" }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="email" class="mr-2" />
-                    Почта
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.email || "Не указан" }}
-                  </td>
-                </tr>
-                <tr class="flex">
-                  <td class="inline-flex w-40 px-2.5 font-bold">
-                    <UIIcon name="check" class="mr-2" />
-                    Статус
-                  </td>
-                  <td class="px-2.5">
-                    {{ client.active ? "Активен" : "В архиве" }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </client-only>
+        <div class="flex">
+          <table class="table-fixed text-sm">
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-600">
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="grade" class="mr-2" />
+                  Роль
+                </td>
+                <td class="px-2.5">
+                  {{ client.role === "client" ? "Клиент" : "Сотрудник" }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="grade" class="mr-2" />
+                  Программа
+                </td>
+                <td class="px-2.5">
+                  {{ client.program || "Не указана" }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="group" class="mr-2" />
+                  Категория
+                </td>
+                <td class="px-2.5">
+                  {{ client.category.value }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="subscription" class="mr-2" />
+                  Абонемент
+                </td>
+                <td class="px-2.5">
+                  {{ client.subs_fee || "Отсутствует" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="table-fixed text-sm">
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-600">
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="event" class="mr-2" />
+                  Дата Рождения
+                </td>
+                <td class="px-2.5">
+                  {{
+                    new Date(client.birthdate).toLocaleDateString("ru") ||
+                    "Не указана"
+                  }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="phone" class="mr-2" />
+                  Телефон
+                </td>
+                <td class="px-2.5">
+                  {{ client.phone || "Не указан" }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="email" class="mr-2" />
+                  Почта
+                </td>
+                <td class="px-2.5">
+                  {{ client.email || "Не указан" }}
+                </td>
+              </tr>
+              <tr class="flex">
+                <td class="inline-flex w-40 px-2.5 font-bold">
+                  <UIIcon name="check" class="mr-2" />
+                  Статус
+                </td>
+                <td class="px-2.5">
+                  {{ client.active ? "Активен" : "В архиве" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div class="self-start">
           <UIButton-back />

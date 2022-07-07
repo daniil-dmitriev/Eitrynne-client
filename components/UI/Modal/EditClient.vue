@@ -6,39 +6,38 @@ const toast = useToast();
 const { client } = defineProps(["modelValue", "client"]);
 const emit = defineEmits(["close"]);
 
-const changesInClient = ref(false);
 const config = useRuntimeConfig();
 
-const updatedClient = { ...client };
+const updatedClient = ref({ ...client });
 function updateClient() {
   let date = "";
-  if (updatedClient.birthdate) {
-    const dateArray = updatedClient.birthdate?.split(".");
+  if (updatedClient.value.birthdate) {
+    const dateArray = updatedClient.value.birthdate?.split(".");
     [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
     date = dateArray.join(".");
   }
-  const response = $fetch(`/api/clients/${updatedClient.id}`, {
+  const response = $fetch(`/api/clients/${updatedClient.value.id}`, {
     method: "put",
     body: {
-      name: updatedClient.name,
+      name: updatedClient.value.name,
       birthdate: new Date(date),
-      role: updatedClient.role,
-      category: updatedClient.category.value,
-      subs_fee: updatedClient.subs_fee,
-      phone: updatedClient.phone,
-      active: updatedClient.active,
+      role: updatedClient.value.role,
+      category: updatedClient.value.category.value,
+      subs_fee: updatedClient.value.subs_fee,
+      phone: updatedClient.value.phone,
+      active: updatedClient.value.active,
     },
   });
 
   response.then(() => {
-    const message = updatedClient.name + " был успешно обновлен";
+    const message = updatedClient.value.name + " был успешно обновлен";
     toast.success(message);
   });
 
   response.catch(() => {
     const message =
       "При обновлении " +
-      updatedClient.name +
+      updatedClient.value.name +
       " возникли неполадки. Попробуйте снова.";
     toast.error(message);
   });
