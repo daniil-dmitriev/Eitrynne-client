@@ -6,39 +6,40 @@ const toast = useToast();
 const { client } = defineProps(["modelValue", "client"]);
 const emit = defineEmits(["close"]);
 
-const changesInClient = ref(false);
 const config = useRuntimeConfig();
 
-const updatedClient = { ...client };
+const updatedClient = ref({ ...client });
 function updateClient() {
   let date = "";
-  if (updatedClient.birthdate) {
-    const dateArray = updatedClient.birthdate?.split(".");
+  if (updatedClient.value.birthdate) {
+    const dateArray = updatedClient.value.birthdate?.split(".");
     [dateArray[0], dateArray[1]] = [dateArray[1], dateArray[0]];
     date = dateArray.join(".");
   }
-  const response = $fetch(`/api/clients/${updatedClient.id}`, {
+  const response = $fetch(`/api/clients/${updatedClient.value.id}`, {
     method: "put",
     body: {
-      name: updatedClient.name,
+      name: updatedClient.value.name,
       birthdate: new Date(date),
-      role: updatedClient.role,
-      category: updatedClient.category.value,
-      subs_fee: updatedClient.subs_fee,
-      phone: updatedClient.phone,
-      active: updatedClient.active,
+      role: updatedClient.value.role,
+      category: updatedClient.value.category.value,
+      subs_fee: updatedClient.value.subs_fee,
+      phone: updatedClient.value.phone,
+      active: updatedClient.value.active,
+      program: updatedClient.value.program,
+      email: updatedClient.value.email,
     },
   });
 
   response.then(() => {
-    const message = updatedClient.name + " был успешно обновлен";
+    const message = updatedClient.value.name + " был успешно обновлен";
     toast.success(message);
   });
 
   response.catch(() => {
     const message =
       "При обновлении " +
-      updatedClient.name +
+      updatedClient.value.name +
       " возникли неполадки. Попробуйте снова.";
     toast.error(message);
   });
@@ -94,6 +95,18 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
+                >Программа</label
+              >
+              <div class="relative flex items-center gap-x-2">
+                <UIInput
+                  icon="grade"
+                  placeholder="Например: Латина"
+                  v-model="updatedClient.program"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col space-y-1.5">
+              <label class="pl-1.5 text-xs font-bold text-gray-700"
                 >Категория</label
               >
               <div class="relative flex items-center gap-x-2">
@@ -120,6 +133,19 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
+                >Абонемент</label
+              >
+              <div class="relative flex items-center gap-x-2">
+                <UI-input
+                  placeholder="Ежемесячные взносы"
+                  v-model="updatedClient.subs_fee"
+                  icon="subscription"
+                  mask="#######"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col space-y-1.5">
+              <label class="pl-1.5 text-xs font-bold text-gray-700"
                 >Телефон</label
               >
               <div class="relative flex items-center gap-x-2">
@@ -133,17 +159,17 @@ function updateClient() {
             </div>
             <div class="flex flex-col space-y-1.5">
               <label class="pl-1.5 text-xs font-bold text-gray-700"
-                >Абонемент</label
+                >Email</label
               >
               <div class="relative flex items-center gap-x-2">
                 <UI-input
-                  placeholder="Ежемесячные взносы"
-                  v-model="updatedClient.subs_fee"
-                  icon="subscription"
-                  mask="#######"
+                  placeholder="Введите номер email"
+                  v-model="updatedClient.email"
+                  icon="email"
                 />
               </div>
             </div>
+
             <div class="col-span-3 mt-4 flex justify-between">
               <UIButton-main
                 :name="updatedClient.active ? 'В архив' : 'Из архива'"
