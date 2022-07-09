@@ -2,7 +2,6 @@
 import { useClientDetailsStore } from "~/stores/client-details";
 import { storeToRefs } from "pinia";
 import { useToast } from "vue-toastification";
-import { axios } from "axios";
 
 const config = useRuntimeConfig();
 const route = useRoute();

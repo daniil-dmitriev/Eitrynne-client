@@ -15,7 +15,7 @@ definePageMeta({
           <UILogo />
         </div>
         <div class="my-auto flex w-full items-center justify-center">
-          <!-- <LoginSlider /> -->
+          <TheLoginSlider />
         </div>
       </div>
       <div
