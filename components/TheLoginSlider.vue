@@ -37,7 +37,7 @@ const onSlideChange = () => {
           <h2 class="text-3xl font-bold text-gray-900">
             Повышенная безопасность
           </h2>
-          <p>
+          <p class="text-700">
             Все данные, используемые веб-приложением, хранятся на удаленном
             сервере в зашифрованном виде. Нет причин беспокоиться об их
             безопасности и целостности!
@@ -59,11 +59,11 @@ const onSlideChange = () => {
           <h2 class="text-3xl font-bold text-gray-900">
             Высокая скорость работы
           </h2>
-          <p>
-            <span class="font-bold">ERIYNNE</span> написана с помощью самых
+          <p class="text-700">
+            <span class="font-bold">Eitrynne</span> написана с помощью
             современных средств и технологий разработки в области программного
-            обеспечения, что гарантирует стабильно высокую скорость работы при
-            работе с большим количеством данных.
+            обеспечения, что гарантирует стабильно высокую скорость работы. Даже
+            при работе с большим количеством данных.
           </p>
         </div>
       </div>
@@ -82,8 +82,8 @@ const onSlideChange = () => {
           <h2 class="text-3xl font-bold text-gray-900">
             Большая функциональность
           </h2>
-          <p>
-            <span class="font-bold">EIRYNNE</span> предоставляет пользователям
+          <p class="text-700">
+            <span class="font-bold">Eitrynne</span> предоставляет пользователям
             широкий набор инструментов для работы с данными. «Все так, как
             должно быть!»
           </p>
@@ -93,3 +93,9 @@ const onSlideChange = () => {
     </SwiperSlide>
   </Swiper>
 </template>
+
+<style lang="css">
+.swiper-pagination-bullet {
+  @apply bg-indigo-600;
+}
+</style>

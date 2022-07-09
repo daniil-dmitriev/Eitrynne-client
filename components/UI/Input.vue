@@ -15,6 +15,7 @@
       :value="modelValue"
       @change="$emit('update:modelValue', $event.target.value)"
       v-maska="mask"
+      :type="type"
       :placeholder="placeholder"
     />
 
@@ -36,6 +37,7 @@ defineProps({
   loading: Boolean,
   iconLast: Boolean | false,
   noBorder: Boolean | false,
+  type: String,
 });
 defineEmits(["update:modelValue"]);
 </script>

@@ -70,6 +70,7 @@ const actions = {
         method: "get",
       }
     );
+
     this.loading = false;
   },
 
@@ -81,7 +82,9 @@ const actions = {
       }&balance=${this.search.balance}&count=${this.search.rowPerPage}&offset=${
         this.pagination.current - 1
       }`,
-      { method: "get" }
+      {
+        method: "get",
+      }
     );
     this.pagination.total = parseInt(total);
   },
