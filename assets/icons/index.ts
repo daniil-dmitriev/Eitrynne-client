@@ -20,6 +20,7 @@ import list from "./list.svg";
 import more from "./more.svg";
 import notification from "./notification.svg";
 import payments from "./payments.svg";
+import password from "./password.svg";
 import person from "./person.svg";
 import playlist_add from "./playlist_add.svg";
 import plus from "./plus.svg";
@@ -54,6 +55,7 @@ export {
   more,
   notification,
   payments,
+  password,
   person,
   playlist_add,
   plus,
