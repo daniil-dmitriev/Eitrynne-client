@@ -1,3 +1,16 @@
+<script setup>
+const loading = ref(true);
+
+onMounted(() => {
+  loading.value = false;
+});
+
+function logout() {
+  useRouter().push("/login");
+  $fetch(`/api/auth`, { method: "DELETE" });
+}
+</script>
+
 <template>
   <header>
     <UI-container class="flex items-center justify-between !py-2.5 shadow-sm">
@@ -39,15 +52,9 @@
         <img
           src="https://placekitten.com/500/500"
           class="h-10 w-10 cursor-pointer rounded-full"
+          @click="logout"
         />
       </div>
     </UI-container>
   </header>
 </template>
-<script setup>
-const loading = ref(true);
-
-onMounted(() => {
-  loading.value = false;
-});
-</script>

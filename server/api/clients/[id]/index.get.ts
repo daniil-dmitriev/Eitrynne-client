@@ -1,6 +1,10 @@
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const id = event.context.params.id;
 
-  return $fetch(config.API_BASE_URL + "/clients/" + id);
+  return await $fetch(`${config.API_BASE_URL}/clients/${id}`, {
+    headers: {
+      authorization: `Bearer ${useCookies(event.req).token}`,
+    },
+  });
 });

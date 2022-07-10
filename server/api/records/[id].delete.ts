@@ -4,5 +4,8 @@ export default defineEventHandler(async (event) => {
 
   return await $fetch(`${config.API_BASE_URL}/records/${id}`, {
     method: "delete",
+    headers: {
+      authorization: `Bearer ${useCookies(event.req).token}`,
+    },
   });
 });

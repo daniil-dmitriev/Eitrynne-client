@@ -6,5 +6,8 @@ export default defineEventHandler(async (event) => {
   return $fetch(`${config.API_BASE_URL}/records`, {
     method: "post",
     body,
+    headers: {
+      authorization: `Bearer ${useCookies(event.req).token}`,
+    },
   });
 });

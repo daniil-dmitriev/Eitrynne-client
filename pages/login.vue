@@ -35,7 +35,7 @@ async function login() {
     }
   });
 
-  response.catch(() => {
+  response.catch((e) => {
     toast.error(
       "Пользователь не найден. Проверьте правильность введенных данных."
     );

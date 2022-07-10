@@ -158,7 +158,7 @@ function deleteRecord(record) {
             <th class="py-3 px-4 text-center">Действия</th>
           </tr>
         </thead>
-        <tbody v-if="pending || records.length == 0" class="h-96">
+        <tbody v-if="pending || !records" class="h-96">
           <tr v-if="pending">
             <client-only>
               <td colspan="8" align="center">

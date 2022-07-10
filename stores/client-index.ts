@@ -62,16 +62,25 @@ const actions = {
   async fetchClients() {
     this.loading = true;
     this.countClient();
-    this.indexTable.clients = await $fetch(
-      `/api/clients?name=${this.search.name}&role=${this.search.role}&balance=${
-        this.search.balance
-      }&count=${this.search.rowPerPage}&offset=${this.pagination.current - 1}`,
-      {
-        method: "get",
-      }
-    );
-
-    this.loading = false;
+    try {
+      this.indexTable.clients = await $fetch(
+        `/api/clients?name=${this.search.name}&role=${
+          this.search.role
+        }&balance=${this.search.balance}&count=${
+          this.search.rowPerPage
+        }&offset=${this.pagination.current - 1}`,
+        {
+          method: "get",
+        }
+      );
+    } catch (e) {
+      useFetch("/api/auth", {
+        method: "delete",
+      });
+      useRouter().push("/login");
+    } finally {
+      this.loading = false;
+    }
   },
 
   async countClient() {
@@ -84,6 +93,9 @@ const actions = {
       }`,
       {
         method: "get",
+        // headers: {
+        //   authorization: `Bearer ${useCookie("token").value}`,
+        // },
       }
     );
     this.pagination.total = parseInt(total);
