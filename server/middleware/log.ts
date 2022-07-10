@@ -1,3 +1,3 @@
 export default defineEventHandler((event) => {
-  return false;
+  console.log("New request: " + event.req.url);
 });

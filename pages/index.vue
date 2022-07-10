@@ -1,5 +1,5 @@
 <script setup></script>
 
 <template>
-  <UI-container> This is main page </UI-container>
+  <UI-container> this is graphics </UI-container>
 </template>

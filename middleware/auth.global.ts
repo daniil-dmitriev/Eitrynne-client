@@ -1,7 +1,10 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const response = await $fetch("/api/auth/check");
-  console.log("to >>", to);
-  // if (true && to.fullPath !== "/") {
-  //   return navigateTo("/");
-  // }
+  if (!useCookie("token").value && to.path !== "/login") {
+    return navigateTo("/login");
+  }
+  const response = $fetch("/api/records");
+  response.catch(async () => {
+    $fetch("/api/auth", { method: "DELETE" });
+    return navigateTo("/login");
+  });
 });

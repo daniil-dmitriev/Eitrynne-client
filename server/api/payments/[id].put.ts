@@ -8,5 +8,8 @@ export default defineEventHandler(async (event) => {
   return await $fetch(`${config.API_BASE_URL}/payments/${id}`, {
     method: "put",
     body,
+    headers: {
+      authorization: `Bearer ${useCookies(event.req).token}`,
+    },
   });
 });
