@@ -4,7 +4,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
   const response = $fetch("/api/records");
   response.catch(async () => {
-    $fetch("/api/auth", { method: "DELETE" });
+    await $fetch("/api/auth", {method: "DELETE"});
     return navigateTo("/login");
   });
 });

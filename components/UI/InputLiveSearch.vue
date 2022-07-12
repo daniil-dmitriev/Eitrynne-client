@@ -1,4 +1,5 @@
 <script setup>
+
 const { modelValue, type } = defineProps({
   modelValue: String | Number,
   type: String,
