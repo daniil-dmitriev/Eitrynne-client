@@ -1,5 +1,6 @@
 <script setup>
 import { useToast } from "vue-toastification";
+import {useHead} from "nuxt/app";
 
 useHead({
   title: "Eitrynne. Авторизация пользователя",
